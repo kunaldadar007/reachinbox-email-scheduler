@@ -22,10 +22,22 @@ dotenv.config();
 const app = express();
 const PORT = parseInt(process.env.PORT || '5000') || 5000; // ✅ keep backend on 5000 for stable connection
 
-// ✅ CORS configuration (important fix for "Failed to fetch")
+// ✅ CORS configuration
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173', // local dev
+  'http://localhost:3000',
+  process.env.FRONTEND_URL || '', // production frontend
+];
+
 app.use(
   cors({
-    origin: '*', // allow all for dev (safe on localhost)
+    origin: (origin, callback) => {
+      if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
@@ -52,15 +64,40 @@ app.use(errorHandler);
 async function startServer() {
   try {
     console.log('🚀 Starting ReachInbox backend server...');
+    console.log('Environment:', {
+      NODE_ENV: process.env.NODE_ENV,
+      DATABASE_URL: process.env.DATABASE_URL ? 'SET' : 'NOT SET',
+      REDIS_URL: process.env.REDIS_URL ? 'SET' : 'NOT SET',
+      DB_TYPE: process.env.DB_TYPE,
+      PORT: PORT,
+    });
 
     // Initialize database
-    await initDatabase();
+    try {
+      await initDatabase();
+      console.log('✅ Database initialized');
+    } catch (dbError) {
+      console.error('⚠️ Database initialization failed:', dbError);
+      // Don't exit - allow server to start and handle requests without DB
+    }
 
     // Initialize Redis
-    initRedis();
+    try {
+      initRedis();
+      console.log('✅ Redis connection initiated');
+    } catch (redisError) {
+      console.error('⚠️ Redis initialization error:', redisError);
+      // Don't exit - allow server to start without Redis
+    }
 
     // Initialize email service
-    await initEmailService();
+    try {
+      await initEmailService();
+      console.log('✅ Email service initialized');
+    } catch (emailError) {
+      console.error('⚠️ Email service initialization failed:', emailError);
+      // Don't exit - allow server to start
+    }
 
     // Start Express server
     app.listen(PORT, () => {
