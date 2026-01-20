@@ -34,7 +34,7 @@ services:
   - key: DATABASE_URL
     sync: false
   region: oregon
-  buildCommand: npm install && npm run build
-  startCommand: npm start
+  buildCommand: cd backend && npm install && npm run build
+  startCommand: cd backend && npm start
   autoDeployTrigger: commit
-  rootDir: backend
+  rootDir: .
