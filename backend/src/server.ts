@@ -20,7 +20,7 @@ import './workers/emailWorker'; // Start the worker
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000; // ✅ keep backend on 5000 for stable connection
+const PORT = parseInt(process.env.PORT || '5000') || 5000; // ✅ keep backend on 5000 for stable connection
 
 // ✅ CORS configuration (important fix for "Failed to fetch")
 app.use(

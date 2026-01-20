@@ -10,10 +10,12 @@ import { Queue, QueueOptions } from 'bullmq';
 // IMPORTANT:
 // Do NOT pass a Redis instance directly.
 // BullMQ expects connection OPTIONS, not an ioredis object.
+const redisPort = parseInt(process.env.REDIS_PORT || '6379') || 6379;
+
 const queueOptions: QueueOptions = {
   connection: {
-    host: process.env.REDIS_HOST,
-    port: Number(process.env.REDIS_PORT),
+    host: process.env.REDIS_HOST || "127.0.0.1",
+    port: redisPort,
     password: process.env.REDIS_PASSWORD || undefined,
   },
   defaultJobOptions: {

@@ -21,9 +21,11 @@ export function initRedis(): Redis {
     return redisClient;
   }
 
+  const redisPort = parseInt(process.env.REDIS_PORT || '6379') || 6379;
+  
   redisClient = new Redis({
     host: process.env.REDIS_HOST || "127.0.0.1",
-    port: Number(process.env.REDIS_PORT) || 6379,
+    port: redisPort,
 
     // ✅ REQUIRED by BullMQ
     maxRetriesPerRequest: null,

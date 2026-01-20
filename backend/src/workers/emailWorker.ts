@@ -16,13 +16,15 @@ import {
 } from '../models/EmailModel';
 
 // Worker configuration
+const redisPort = parseInt(process.env.REDIS_PORT || '6379') || 6379;
+
 const workerOptions: WorkerOptions = {
   connection: {
     host: process.env.REDIS_HOST || 'localhost',
-    port: Number(process.env.REDIS_PORT || 6379),
+    port: redisPort,
     password: process.env.REDIS_PASSWORD || undefined,
   },
-  concurrency: parseInt(process.env.QUEUE_CONCURRENCY || '5'), // Process 5 emails concurrently
+  concurrency: parseInt(process.env.QUEUE_CONCURRENCY || '5') || 5, // Process 5 emails concurrently
   limiter: {
     // Rate limit: max 100 jobs per hour (additional safety)
     max: parseInt(process.env.HOURLY_EMAIL_LIMIT || '100'),

@@ -15,7 +15,7 @@ dotenv.config();
 let mysqlPool: mysql.Pool | null = null;
 let pgPool: Pool | null = null;
 
-const dbType = process.env.DB_TYPE || 'mysql';
+const dbType = process.env.DB_TYPE || 'postgres';
 
 /**
  * Initialize MySQL connection pool
@@ -23,7 +23,7 @@ const dbType = process.env.DB_TYPE || 'mysql';
 async function initMySQL() {
   mysqlPool = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '3306'),
+    port: parseInt(process.env.DB_PORT || '3306') || 3306,
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'reachinbox',
@@ -46,9 +46,11 @@ async function initMySQL() {
  * Initialize PostgreSQL connection pool
  */
 async function initPostgres() {
+  const port = parseInt(process.env.DB_PORT || '5432') || 5432;
+  
   pgPool = new Pool({
     host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432'),
+    port: port,
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'reachinbox',
