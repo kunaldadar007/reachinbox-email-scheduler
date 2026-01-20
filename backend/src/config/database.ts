@@ -48,14 +48,21 @@ async function initMySQL() {
 async function initPostgres() {
   const port = parseInt(process.env.DB_PORT || '5432') || 5432;
   
-  pgPool = new Pool({
-    host: process.env.DB_HOST || 'localhost',
-    port: port,
-    user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'reachinbox',
-    max: 10,
-  });
+  // Use DATABASE_URL if provided (for Supabase), otherwise build from individual vars
+  const connectionConfig = process.env.DATABASE_URL 
+    ? {
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false }, // Required for Supabase
+      }
+    : {
+        host: process.env.DB_HOST || 'localhost',
+        port: port,
+        user: process.env.DB_USER || 'postgres',
+        password: process.env.DB_PASSWORD || '',
+        database: process.env.DB_NAME || 'reachinbox',
+      };
+
+  pgPool = new Pool(connectionConfig);
 
   // Test connection
   try {
