@@ -1,0 +1,40 @@
+# Exported from Render on 2026-01-20T14:18:05Z
+version: "1"
+services:
+- type: web
+  name: reachinbox-api
+  runtime: node
+  repo: https://github.com/kunaldadar007/reachinbox-email-scheduler
+  plan: free
+  envVars:
+  - key: QUEUE_CONCURRENCY
+    sync: false
+  - key: HOURLY_EMAIL_LIMIT
+    sync: false
+  - key: REDIS_PORT
+    sync: false
+  - key: REDIS_HOST
+    sync: false
+  - key: NODE_ENV
+    sync: false
+  - key: PORT
+    sync: false
+  - key: DB_TYPE
+    sync: false
+  - key: DB_PORT
+    sync: false
+  - key: DB_NAME
+    sync: false
+  - key: DB_PASSWORD
+    sync: false
+  - key: DB_USER
+    sync: false
+  - key: DB_HOST
+    sync: false
+  - key: DATABASE_URL
+    sync: false
+  region: oregon
+  buildCommand: npm install && npm run build
+  startCommand: npm start
+  autoDeployTrigger: commit
+  rootDir: backend
