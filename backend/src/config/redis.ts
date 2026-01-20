@@ -21,18 +21,24 @@ export function initRedis(): Redis {
     return redisClient;
   }
 
-  const redisPort = parseInt(process.env.REDIS_PORT || '6379') || 6379;
-  
-  redisClient = new Redis({
-    host: process.env.REDIS_HOST || "127.0.0.1",
-    port: redisPort,
-
-    // ✅ REQUIRED by BullMQ
-    maxRetriesPerRequest: null,
-
-    // Optional but recommended
-    enableReadyCheck: true
-  });
+  // Use REDIS_URL if provided (Redis Cloud), otherwise use host/port
+  if (process.env.REDIS_URL) {
+    redisClient = new Redis(process.env.REDIS_URL, {
+      // ✅ REQUIRED by BullMQ
+      maxRetriesPerRequest: null,
+      enableReadyCheck: true,
+    });
+  } else {
+    const redisPort = parseInt(process.env.REDIS_PORT || '6379') || 6379;
+    
+    redisClient = new Redis({
+      host: process.env.REDIS_HOST || "127.0.0.1",
+      port: redisPort,
+      // ✅ REQUIRED by BullMQ
+      maxRetriesPerRequest: null,
+      enableReadyCheck: true
+    });
+  }
 
   redisClient.on("connect", () => {
     console.log("✅ Redis connected successfully");
