@@ -7,7 +7,6 @@
  */
 
 import { Worker, WorkerOptions } from 'bullmq';
-import { getRedisClient } from '../config/redis';
 import { sendEmail } from '../services/EmailService';
 import { canSendEmail, incrementSentCount } from '../services/RateLimiter';
 import {
@@ -18,7 +17,11 @@ import {
 
 // Worker configuration
 const workerOptions: WorkerOptions = {
-  connection: getRedisClient(),
+  connection: {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: Number(process.env.REDIS_PORT || 6379),
+    password: process.env.REDIS_PASSWORD || undefined,
+  },
   concurrency: parseInt(process.env.QUEUE_CONCURRENCY || '5'), // Process 5 emails concurrently
   limiter: {
     // Rate limit: max 100 jobs per hour (additional safety)

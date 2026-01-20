@@ -6,7 +6,7 @@
  */
 
 import mysql from 'mysql2/promise';
-import { Pool } from 'pg';
+import pg, { Pool } from 'pg';
 import dotenv from 'dotenv';
 
 dotenv.config();

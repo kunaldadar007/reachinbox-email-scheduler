@@ -1,82 +1,80 @@
-# ReachInbox – Full-stack Email Job Scheduler
+# ReachInbox - Email Job Scheduler
 
-A comprehensive email scheduling system built with TypeScript, Express.js, BullMQ, Redis, MySQL/PostgreSQL, React.js, and Tailwind CSS. This application allows users to schedule bulk emails with rate limiting, concurrency control, and persistent job management.
+A full-stack email scheduling system with TypeScript, Express, BullMQ, Redis, MySQL, React, and Vite.
 
-## 🏗️ Architecture Overview
+## Quick Start
 
-### Backend Architecture
+### Prerequisites
+- Node.js 18+
+- MySQL 8+ or PostgreSQL 14+
+- Redis 6.2+
 
-**Queue System (BullMQ + Redis)**
-- Uses BullMQ for delayed job processing (no cron jobs)
-- Redis acts as both the queue store and cache
-- Jobs are persisted in Redis, ensuring they survive server restarts
-- Each email recipient becomes a separate delayed job with calculated delay
+### Local Development
 
-**Rate Limiting Strategy**
-- Configurable hourly limit per sender (default: 100 emails/hour)
-- Rate limiting is enforced at the queue level using BullMQ's rate limiter
-- Prevents overwhelming email service providers
-- Tracks sent emails per hour per sender in Redis
+1. Clone and install dependencies:
+```bash
+npm install
+```
 
-**Concurrency Control**
-- BullMQ processes multiple jobs in parallel (configurable concurrency)
-- Safe concurrent email sending without race conditions
-- Each job is atomic and independent
+2. Configure environment variables:
+```bash
+# Backend
+cp backend/.env.example backend/.env
+# Edit backend/.env with your database and Redis credentials
 
-**Persistence Layer**
-- MySQL/PostgreSQL stores all scheduled and sent email records
-- Job status tracked: `pending`, `processing`, `completed`, `failed`
-- Email metadata (subject, body, recipient, scheduled time) persisted
-- Enables querying scheduled and sent emails via REST API
+# Frontend
+cp frontend/.env.example frontend/.env
+# Edit frontend/.env with your API URL and Google OAuth credentials
+```
 
-**Email Service (Ethereal Email)**
-- Uses Ethereal Email for testing (fake SMTP server)
-- Generates test credentials on startup
-- All emails are captured in Ethereal's web interface for verification
-- Production-ready: can swap to real SMTP (SendGrid, AWS SES, etc.)
+3. Start development servers:
+```bash
+npm run dev
+```
 
-### Frontend Architecture
+Frontend runs at http://localhost:5173  
+Backend API runs at http://localhost:5000
 
-**Authentication**
-- Google OAuth 2.0 integration
-- Stores user session in localStorage
-- Displays user name, email, and avatar
+### Production Deployment
 
-**State Management**
-- React hooks for local state management
-- API calls via fetch with proper error handling
-- Loading states and empty states for better UX
+Deploy on Render.com:
 
-**Component Structure**
-- Dashboard with tabbed interface (Scheduled / Sent)
-- Compose Email modal with CSV upload
-- Data tables with pagination-ready structure
-- Responsive design with Tailwind CSS
+1. Push code to GitHub
+2. Create Backend Web Service (Node 18)
+   - Build: `npm run build`
+   - Start: `npm start`
+3. Create Frontend Static Site
+   - Build: `cd frontend && npm run build`
+   - Publish: `frontend/dist`
+4. Set environment variables for each service
+5. Deploy database and Redis services
 
-## 📁 Project Structure
+See deployment documentation in backend and frontend README files.
+
+## Project Structure
 
 ```
 reachinbox/
 ├── backend/
 │   ├── src/
-│   │   ├── config/          # Configuration files
-│   │   ├── database/        # DB connection and migrations
-│   │   ├── models/          # Database models
-│   │   ├── queues/          # BullMQ queue setup
-│   │   ├── workers/         # Email processing workers
-│   │   ├── services/        # Business logic (email, rate limiting)
-│   │   ├── routes/          # Express API routes
-│   │   ├── middleware/      # Express middleware
-│   │   └── server.ts        # Express server entry point
+│   │   ├── config/          Configuration files
+│   │   ├── database/        Database setup
+│   │   ├── models/          Database models
+│   │   ├── queues/          BullMQ queues
+│   │   ├── workers/         Job processors
+│   │   ├── services/        Business logic
+│   │   ├── routes/          API endpoints
+│   │   ├── middleware/      Express middleware
+│   │   └── server.ts        Entry point
 │   ├── package.json
 │   └── tsconfig.json
 ├── frontend/
 │   ├── src/
-│   │   ├── components/      # React components
-│   │   ├── pages/           # Page components
-│   │   ├── services/        # API service functions
-│   │   ├── hooks/           # Custom React hooks
-│   │   └── App.tsx          # Main app component
+│   │   ├── components/      React components
+│   │   ├── pages/           Pages
+│   │   ├── services/        API client
+│   │   ├── hooks/           Custom hooks
+│   │   └── App.tsx          Main app
 │   ├── package.json
 │   └── tsconfig.json
 └── README.md

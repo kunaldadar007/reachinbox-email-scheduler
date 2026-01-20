@@ -1,16 +1,21 @@
 /**
  * Email Queue Configuration
- * 
+ *
  * Sets up BullMQ queue for delayed email sending.
  * Uses Redis as the backing store, ensuring jobs persist across server restarts.
  */
 
 import { Queue, QueueOptions } from 'bullmq';
-import { getRedisClient } from '../config/redis';
 
-// Queue configuration
+// IMPORTANT:
+// Do NOT pass a Redis instance directly.
+// BullMQ expects connection OPTIONS, not an ioredis object.
 const queueOptions: QueueOptions = {
-  connection: getRedisClient(),
+  connection: {
+    host: process.env.REDIS_HOST,
+    port: Number(process.env.REDIS_PORT),
+    password: process.env.REDIS_PASSWORD || undefined,
+  },
   defaultJobOptions: {
     // Jobs are removed after completion (keep for 24 hours)
     removeOnComplete: {
@@ -35,7 +40,7 @@ export const emailQueue = new Queue('email-queue', queueOptions);
 
 /**
  * Add email job to queue with delay
- * 
+ *
  * @param emailData Email data (recipient, subject, body)
  * @param delayMs Delay in milliseconds before processing
  * @returns Job ID
@@ -55,12 +60,12 @@ export async function addEmailJob(
     'send-email',
     emailData,
     {
-      delay: delayMs, // Delay before processing
-      jobId: emailData.jobId, // Use our custom job ID
+      delay: delayMs,
+      jobId: emailData.jobId,
     }
   );
 
-  return job.id!;
+  return job.id as string;
 }
 
 /**
